@@ -1,2 +1,2 @@
-# Implementing-Production-Grade-CI-CD-pipelines-on-AWS
-Implementing Production Grade CI/CD pipelines on AWS, published by Packt 
+# Modern-CI-CD-on-AWS
+Modern CI/CD on AWS, published by Packt 

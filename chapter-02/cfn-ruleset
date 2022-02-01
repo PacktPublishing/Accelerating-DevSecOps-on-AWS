@@ -1,0 +1,35 @@
+let volumes = Resources.*[ Type == 'AWS::EC2::Volume' ]
+rule VOLUME_CHECK when %volumes !empty {
+    %volumes.Properties {
+         Encrypted == true
+         Size in [50,100,120]
+         VolumeType == 'gp2'
+         AvailabilityZone in ['ap-southeast-1a']
+    }
+}
+
+let sg = Resources.*[ Type == 'AWS::EC2::SecurityGroup' ]
+rule SECURITYGROUP_CHECK when %sg !empty {
+    %sg.Properties {
+	SecurityGroupIngress[*]{
+	CidrIp != '0.0.0.0/0'
+		}	
+	}
+}
+
+let ec2_instance = Resources.*[ Type == 'AWS::EC2::Instance' ]
+let ec2_instance_dev = %ec2_instance [ Properties.Tags[1].Value == 'Dev' ]
+let ec2_instance_prod = %ec2_instance [ Properties.Tags[1].Value == 'Prod' ]
+rule EC2INSTANCE_DEV_CHECK { 
+        when %ec2_instance_dev !empty {
+        %ec2_instance.Properties.InstanceType == 't2.micro'
+	%ec2_instance.Properties.AvailabilityZone == 'ap-southeast-1a'
+        }
+}
+rule EC2INSTANCE_PROD_CHECK {
+        when %ec2_instance_prod !empty {
+        %ec2_instance.Properties.InstanceType == 't2.xlarge'
+	%ec2_instance.Properties.AvailabilityZone == 'ap-southeast-1a'
+        }
+}
+

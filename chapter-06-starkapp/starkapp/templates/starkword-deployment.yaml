@@ -1,0 +1,22 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: {{ .Values.starkword.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.starkword.Appname }}
+spec:
+  replicas: {{ .Values.starkword.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.starkword.Appname }}
+    spec:
+      containers:
+      - name: {{ .Values.starkword.Appname }}
+        image: {{ .Values.starkword.image.repository }}:{{ .Values.starkword.image.tag }}
+        ports:
+        - containerPort: {{ .Values.starkword.internalPort}}
+          name: api
+      imagePullSecrets:
+      - name: {{.Values.starkword.imagePullSecrets}}

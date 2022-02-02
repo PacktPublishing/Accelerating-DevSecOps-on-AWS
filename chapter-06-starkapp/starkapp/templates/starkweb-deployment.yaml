@@ -1,0 +1,22 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: {{ .Values.starkweb.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.starkweb.Appname }}
+spec:
+  replicas: {{ .Values.starkweb.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.starkweb.Appname }}
+    spec:
+      containers:
+      - name: {{ .Values.starkweb.Appname }}
+        image: {{ .Values.starkweb.image.repository }}:{{ .Values.starkweb.image.tag }}
+        imagePullPolicy: {{ .Values.starkweb.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.starkweb.internalPort }}
+      imagePullSecrets:
+        - name: {{.Values.starkweb.imagePullSecrets }}

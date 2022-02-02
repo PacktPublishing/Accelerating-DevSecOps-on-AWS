@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.starkword.name }}
+  labels:
+    app: {{ .Values.starkword.Appname }}
+spec:
+  ports:
+    - port: {{ .Values.starkword.internalPort}}
+      targetPort: {{ .Values.starkword.internalPort}}
+      name: api
+  selector:
+    app: {{ .Values.starkword.Appname }}
+  clusterIP: None

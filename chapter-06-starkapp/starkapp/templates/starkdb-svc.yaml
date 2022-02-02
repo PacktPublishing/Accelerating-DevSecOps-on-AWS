@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.starkdb.name }}
+  labels:
+    app: {{ .Values.starkdb.Appname }}
+spec:
+  ports:
+    - port: {{ .Values.starkdb.internalPort}}
+      targetPort: {{ .Values.starkdb.internalPort}}
+      name: db
+  selector:
+    app: {{ .Values.starkdb.Appname }}
+  clusterIP: None

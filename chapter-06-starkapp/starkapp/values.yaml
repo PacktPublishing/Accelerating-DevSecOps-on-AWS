@@ -1,0 +1,32 @@
+starkword:
+   name: words
+   replicaCount: 5
+   Appname: words-api
+   image: 
+     repository: harbor-core.spartan-360.com/library/starkapp
+     tag: word
+   internalPort: 8080
+   imagePullSecrets: harbkubesec
+
+starkweb:
+   name: web
+   replicaCount: 1
+   Appname: words-web
+   image: 
+     repository: harbor-core.spartan-360.com/library/starkapp
+     tag: web
+     pullPolicy: IfNotPresent
+   internalPort: 80
+   imagePullSecrets: harbkubesec
+
+starkdb:
+   name: db
+   Appname: words-db
+   image: 
+     repository: harbor-core.spartan-360.com/library/starkapp
+     tag: db
+   internalPort: 5432
+   imagePullSecrets: harbkubesec
+ingress:
+   name: stark-ingress
+   host: yourdomain.here

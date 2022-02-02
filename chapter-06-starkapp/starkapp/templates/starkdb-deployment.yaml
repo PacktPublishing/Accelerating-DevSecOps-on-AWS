@@ -1,0 +1,21 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name:  {{ .Values.starkdb.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Values.starkdb.Appname }}
+spec:
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.starkdb.Appname }}
+    spec:
+      containers:
+      - name: {{ .Values.starkdb.Appname }}
+        image: {{ .Values.starkdb.image.repository }}:{{ .Values.starkdb.image.tag }}
+        ports:
+        - containerPort: {{ .Values.starkdb.internalPort}}
+          name: db
+      imagePullSecrets:
+      - name: {{.Values.starkdb.imagePullSecrets}}

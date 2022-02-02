@@ -1,0 +1,35 @@
+{
+  "name": "nodejs-rest-student",
+  "version": "1.0.0",
+  "description": "A REST API with Nodejs and Mysql",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "db:migrate": "sequelize db:migrate --env development",
+    "db:migrate:test": "sequelize db:migrate --env test",
+    "test": "nyc mocha --exit"
+  },
+  "author": "Nikit Swaraj",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cookie-parser": "^1.4.5",
+    "cors": "^2.8.5",
+    "debug": "^4.2.0",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "http-errors": "^1.8.0",
+    "jade": "^1.11.0",
+    "morgan": "^1.10.0",
+    "mysql2": "^2.2.5",
+    "sequelize": "^6.3.5",
+    "sleep": "^6.3.0"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-http": "^4.3.0",
+    "mocha": "^8.2.0",
+    "nodemon": "^2.0.6",
+    "nyc": "^15.1.0"
+  }
+}

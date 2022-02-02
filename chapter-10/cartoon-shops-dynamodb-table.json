@@ -1,0 +1,47 @@
+{
+    "gdo-serverless-stack-ShopsTableMonitorOper-XNP81JVKPCM3": [
+        {
+            "PutRequest": {
+                "Item": {
+                  "name": {
+                        "S": "shinchan Nohara"
+                    },
+                  "specialty": {
+                        "S": "naughty"
+                    },
+                  "address": {
+                        "S": "Japan"
+                    },
+                  "url": {
+                        "S": "www.shinchanblabla.com"
+                    },
+                  "description": {
+                        "S": "This is my favorite cartoon"
+                    }
+                }
+            }
+
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                  "name": {
+                        "S": "doraemon"
+                    },
+                  "specialty": {
+                        "S": "cute-cat"
+                    },
+                  "address": {
+                        "S": "japan"
+                    },
+                  "url": {
+                        "S": "www.doreamon-cat.com"
+                    },
+                  "description": {
+                        "S": "This is my favorite animal"
+                    }
+                }
+            }
+        }
+    ]
+}

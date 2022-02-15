@@ -1,5 +1,5 @@
 {
-    "gdo-serverless-stack-ShopsTableMonitorOper-XNP81JVKPCM3": [
+    "<YOUR-DYNAMODB-TABLE-NAME>": [
         {
             "PutRequest": {
                 "Item": {

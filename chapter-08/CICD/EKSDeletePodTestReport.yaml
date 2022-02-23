@@ -1,9 +1,7 @@
 version: 0.2
-
 env:
   variables:
      EKS_CLUSTER_NAME: "catalogapp-stage"
-
 phases:
   install:
     commands:

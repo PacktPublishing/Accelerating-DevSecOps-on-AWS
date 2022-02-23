@@ -1,6 +1,6 @@
 ---
 description: |
-  ### Document name - Delete Pod
+  ### Document name - Delete Pod in a namespace
 
   ## What does this document do?
   Delete Pod in a specific namespace via kubectl

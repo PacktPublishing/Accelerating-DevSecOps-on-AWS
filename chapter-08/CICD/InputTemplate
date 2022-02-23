@@ -1,0 +1,36 @@
+{
+  "sourceVersion": <sourceVersion>,
+  "artifactsOverride": {"type": "NO_ARTIFACTS"},
+  "environmentVariablesOverride": [
+     {
+         "name": "PULL_REQUEST_ID",
+         "value": <pullRequestId>,
+         "type": "PLAINTEXT"
+     },
+     {
+         "name": "REPOSITORY_NAME",
+         "value": <repositoryName>,
+         "type": "PLAINTEXT"
+     },
+     {
+         "name": "SOURCE_COMMIT",
+         "value": <sourceCommit>,
+         "type": "PLAINTEXT"
+     },
+     {
+         "name": "DESTINATION_COMMIT",
+         "value": <destinationCommit>,
+         "type": "PLAINTEXT"
+     },
+     {
+        "name" : "REVISION_ID",
+        "value": <revisionId>,
+        "type": "PLAINTEXT"
+     },
+     {
+       "name" : "SOURCE_BRANCH",
+       "value": <sourceReference>,
+       "type": "PLAINTEXT"
+     }
+  ]
+}

@@ -1,0 +1,84 @@
+version: 0.2
+
+env:
+  variables:
+     ACCOUNT_ID: "<AccounNo>"
+     AWS_REGION: "us-east-1"
+     PROJECT_NAME: "catalogapp"
+     EKS_CLUSTER_NAME: "catalogapp-dev"
+     DEPLOYMENT_NAME: "prodcatalog"
+phases:
+  install:
+    commands:
+      - curl -o aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.21.2/2021-07-05/bin/linux/amd64/aws-iam-authenticator
+      - curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.21.2/2021-07-05/bin/linux/amd64/kubectl
+      - chmod +x ./kubectl ./aws-iam-authenticator
+      - export PATH=$PWD/:$PATH
+      - export KUBECONFIG=$HOME/.kube/config
+  pre_build:
+    commands:
+      - |
+         echo "=============== list modified files ==============="
+         git diff --name-only HEAD^ develop
+         echo "========== check paths of modified files =========="
+         git diff --name-only HEAD^ develop > files.txt
+         if grep 'product_catalog/' files.txt; then
+            echo "There is a change under the 'product_catalog' folder."
+            echo "Continuing the build"
+            exit_status=0
+         else
+            echo "There is no change in the folder"
+            exit_status=1
+         fi
+      - echo $exit_status 
+  build:
+    commands:
+      - |
+        if [ $exit_status == 0 ]; then
+           ls -al
+           cd product_catalog
+           
+           REGISTRY_URI=${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+           aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin $REGISTRY_URI
+           
+           IMAGE_TAG=$(date +"%Y%m%d%H%M")-$CODEBUILD_BUILD_NUMBER
+           REPOSITORY_URI=$REGISTRY_URI/${PROJECT_NAME}/product_catalog:$IMAGE_TAG
+           
+           docker build -t $REPOSITORY_URI .
+           docker push $REPOSITORY_URI
+           
+           echo "===============Image Scanning==============="
+           aws ecr start-image-scan --repository-name ${PROJECT_NAME}/product_catalog --image-id imageTag=$IMAGE_TAG
+           
+           ECRIMAGE_SCAN_STATUS=$( aws ecr describe-image-scan-findings --repository-name ${PROJECT_NAME}/product_catalog --image-id imageTag=$IMAGE_TAG | jq -r .imageScanStatus.status)
+           until [ "$ECRIMAGE_SCAN_STATUS" == "COMPLETE" ]; do
+              
+              printf "ECRIMAGE SCAN IS IN PROGRESS \n"
+              sleep 10
+              ECRIMAGE_SCAN_STATUS=$( aws ecr describe-image-scan-findings --repository-name ${PROJECT_NAME}/product_catalog --image-id imageTag=$IMAGE_TAG | jq -r .imageScanStatus.status)
+           
+           done
+           printf "ECR IMAGE SCAN has been completed \n"
+           
+           VULNERABILITY_COUNT=$( aws ecr describe-image-scan-findings --repository-name ${PROJECT_NAME}/product_catalog --image-id imageTag=$IMAGE_TAG | jq -r .imageScanFindings.findingSeverityCounts.CRITICAL)
+           
+           if [ $VULNERABILITY_COUNT -gt 3 ]; then
+              echo "Pls fix the vulnerabilities, Skipping Deployment of service"
+           else
+              echo "Deploying Service to Kubernetes"
+              export REPOSITORY_URI
+              aws eks update-kubeconfig --name $EKS_CLUSTER_NAME 
+              envsubst < ./kubespec/prodcatalogkubedeploy.yaml | kubectl apply -f -
+              # Check deployment rollout status every 10 seconds (max 10 minutes) until complete.
+              ATTEMPTS=0
+              ROLLOUT_STATUS_CMD="kubectl rollout status deployment/$DEPLOYMENT_NAME -n prodcatalog-ns "
+              until $ROLLOUT_STATUS_CMD || [ $ATTEMPTS -eq 60 ]; do
+                 $ROLLOUT_STATUS_CMD
+                 ATTEMPTS=$((attempts + 1))
+                 sleep 10
+              done
+              aws ssm put-parameter --name "product_catalog" --type "String" --value "$REPOSITORY_URI" --overwrite
+           fi    
+        else
+           echo "There has been no change in the folder, so skipping the build"
+        fi

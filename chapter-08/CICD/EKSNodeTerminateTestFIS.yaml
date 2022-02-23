@@ -1,0 +1,63 @@
+version: 0.2
+
+#env:
+  #variables:
+     # key: "value"
+
+phases:
+  #install:
+
+  build:
+    commands:
+      - |
+        echo "###############Starting FIS Test################"
+        echo "===============EKS Node Termination============="
+        cat << EOF > EKSNodeTerminateTestFIS.json
+        {
+            "description": "EKSNodeTerminateTest",
+            "targets": {
+                "Nodegroups-Target-1": {
+                    "resourceType": "aws:eks:nodegroup",
+                    "resourceArns": [
+                        "arn:aws:eks:us-east-1:825031041242:nodegroup/catalogapp-stage/ng-8307b3d0/4ebf9365-ec0f-fe06-8540-30698501a4a2"
+                    ],
+                    "selectionMode": "ALL"
+                }
+            },
+            "actions": {
+                "EKSNodeTerminateTest": {
+                    "actionId": "aws:eks:terminate-nodegroup-instances",
+                    "description": "EKSNodeTerminateTest",
+                    "parameters": {
+                        "instanceTerminationPercentage": "50"
+                    },
+                    "targets": {
+                        "Nodegroups": "Nodegroups-Target-1"
+                    }
+                }
+            },
+            "stopConditions": [
+                {
+                    "source": "aws:cloudwatch:alarm",
+                    "value": "arn:aws:cloudwatch:us-east-1:825031041242:alarm:EKSNodeCountFailure"
+                }
+            ],
+            "roleArn": "arn:aws:iam::825031041242:role/FISROLE",
+            "tags": {
+                "Name": "EKSNodeTerminateTest"
+            }
+        }
+        EOF
+        echo "Creating Experiment Template"
+        EXP_TMP_ID=$(aws fis create-experiment-template --cli-input-json file://EKSNodeTerminateTestFIS.json | jq -r .experimentTemplate.id)
+        echo "The Experiment Template id is $EXP_TMP_ID"
+        echo "Starting the experiment"
+        EXP_ID=$(aws fis start-experiment --experiment-template-id $EXP_TMP_ID | jq -r .experiment.id)
+        echo "$EXP_ID"
+        STATUS=$(aws fis get-experiment --id $EXP_ID | jq -r .experiment.state.status )
+        until [ "$STATUS" == "completed" ]; do
+             echo "experiment is still in progress"
+             sleep 5
+             STATUS=$(aws fis get-experiment --id $EXP_ID | jq -r .experiment.state.status )
+        done
+        echo "Experiment has been completed but pls wait for the test report build to complete"

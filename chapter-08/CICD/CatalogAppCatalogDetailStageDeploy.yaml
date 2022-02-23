@@ -1,0 +1,58 @@
+version: 0.2
+
+env:
+  variables:
+     ACCOUNT_ID: "<YourAccounNo>"
+     AWS_REGION: "us-east-1"
+     PROJECT_NAME: "catalogapp"
+     EKS_CLUSTER_NAME: "catalogapp-stage"
+  parameter-store:
+     REPOSITORY_URI: "catalog_detail"
+phases:
+  install:
+    commands:
+      - curl -o aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.21.2/2021-07-05/bin/linux/amd64/aws-iam-authenticator
+      - curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.21.2/2021-07-05/bin/linux/amd64/kubectl
+      - chmod +x ./kubectl ./aws-iam-authenticator
+      - export PATH=$PWD/:$PATH
+      - export KUBECONFIG=$HOME/.kube/config
+  #pre_build:
+    #commands:
+  build:
+    commands:
+      - |
+        aws eks update-kubeconfig --name $EKS_CLUSTER_NAME
+        DEPLOYMENT_NAME=proddetail
+        CONTAINER_NAME=proddetail
+        CURRENT_DEPLOYED_IMAGE=$(kubectl get deployment $DEPLOYMENT_NAME -n prodcatalog-ns -o=jsonpath='{$.spec.template.spec.containers[:1].image}' 2>/dev/null)
+        if [ -z ${CURRENT_DEPLOYED_IMAGE} ]; then
+                echo "Deployment Doesn't exists"
+                echo "Deploying the Current Image version ..."
+                echo $REPOSITORY_URI
+                envsubst < catalog_detail/kubespec/meshspec/catalogDetailMeshedApp.yaml | kubectl apply -f -
+                # Check deployment rollout status every 10 seconds (max 10 minutes) until complete.
+                ATTEMPTS=0
+                ROLLOUT_STATUS_CMD="kubectl rollout status deployment/$DEPLOYMENT_NAME -n prodcatalog-ns "
+                until $ROLLOUT_STATUS_CMD || [ $ATTEMPTS -eq 60 ]; do
+                   $ROLLOUT_STATUS_CMD
+                   ATTEMPTS=$((attempts + 1))
+                   sleep 10
+                done
+        else
+                echo "the current image is $CURRENT_DEPLOYED_IMAGE"
+                if [ $REPOSITORY_URI == $CURRENT_DEPLOYED_IMAGE ]; then
+                        echo "There is no Change in the Deployment"
+                else
+                        echo "There is change in the deployment Image verion"
+                        echo "Rolling out new version ..."
+                        kubectl set image deployment $DEPLOYMENT_NAME $CONTAINER_NAME=$REPOSITORY_URI -n prodcatalog-ns
+                        # Check deployment rollout status every 10 seconds (max 10 minutes) until complete.
+                        ATTEMPTS=0
+                        ROLLOUT_STATUS_CMD="kubectl rollout status deployment/$DEPLOYMENT_NAME -n prodcatalog-ns"
+                        until $ROLLOUT_STATUS_CMD || [ $ATTEMPTS -eq 60 ]; do
+                          $ROLLOUT_STATUS_CMD
+                          ATTEMPTS=$((attempts + 1))
+                          sleep 10
+                        done
+                fi
+        fi

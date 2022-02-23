@@ -1,0 +1,33 @@
+version: 0.2
+
+env:
+  variables:
+     EKS_CLUSTER_NAME: "catalogapp-stage"
+
+phases:
+  install:
+    commands:
+      - yum --enablerepo epel install moreutils -y
+      - curl -o aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.21.2/2021-07-05/bin/linux/amd64/aws-iam-authenticator
+      - curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.21.2/2021-07-05/bin/linux/amd64/kubectl
+      - chmod +x ./kubectl ./aws-iam-authenticator
+      - export PATH=$PWD/:$PATH
+      - export KUBECONFIG=$HOME/.kube/config
+  build:
+    commands:
+      - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME
+      - |
+        runtime="5 minute"
+        endtime=$(date -ud "$runtime" +%s)
+        endpoint=$( kubectl get svc ingress-gw -n prodcatalog-ns --output="jsonpath={.status.loadBalancer.ingress[0].hostname}")
+        echo "##################Starting Peformance Report##############"
+        while [[ $(date -u +%s) -le $endtime ]]
+        do
+            echo "----Endpoint status----"
+            curl -Is $endpoint | grep HTTP | ts
+            echo "----Pod Status----"
+            kubectl get pods -l 'app in (frontend-node,prodcatalog,proddetail)' -n prodcatalog-ns | sed '1d' | ts
+            echo "----Node Count Status----"
+            kubectl get nodes | sed '1d' | ts
+            sleep 5
+        done

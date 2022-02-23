@@ -1,0 +1,67 @@
+version: 0.2
+
+phases:
+  build:
+    commands:
+       - |
+          echo "###############Starting FIS Test################"
+          echo "===============EKS Pod Deletion============="
+          cat << EOF > EKSPodDeletionTestFIS.json
+          {
+              "description": "EKSDeletePod",
+              "targets": {
+                  "Instances-Target-2": {
+                      "resourceType": "aws:ec2:instance",
+                      "resourceTags": {
+                          "eks:cluster-name": "catalogapp-stage"
+                      },
+                      "filters": [
+                          {
+                              "path": "State.Name",
+                              "values": [
+                                  "running"
+                              ]
+                          }
+                      ],
+                      "selectionMode": "ALL"
+                  }
+              },
+              "actions": {
+                  "EKSDeletePod": {
+                      "actionId": "aws:ssm:send-command",
+                      "description": "EKSDeletePod",
+                      "parameters": {
+                          "documentArn": "arn:aws:ssm:us-east-1:825031041242:document/Delete-Pods",
+                          "documentParameters": "{\"Cluster\":\"catalogapp-stage\", \"Namespace\":\"prodcatalog-ns\", \"InstallDependencies\":\"True\"}",
+                          "duration": "PT1M"
+                      },
+                      "targets": {
+                          "Instances": "Instances-Target-2"
+                      }
+                  }
+              },
+              "stopConditions": [
+                  {
+                      "source": "aws:cloudwatch:alarm",
+                      "value": "arn:aws:cloudwatch:us-east-1:825031041242:alarm:EKSPodDeletion"
+                  }
+              ],
+              "roleArn": "arn:aws:iam::825031041242:role/FISROLE",
+              "tags": {
+                  "Name": "EKSDeletePod"
+              }
+          }
+          EOF
+          echo "Creating Experiment Template"
+          EXP_TMP_ID=$(aws fis create-experiment-template --cli-input-json file://EKSPodDeletionTestFIS.json | jq -r .experimentTemplate.id)
+          echo "The Experiment Template id is $EXP_TMP_ID"
+          echo "Starting the experiment"
+          EXP_ID=$(aws fis start-experiment --experiment-template-id $EXP_TMP_ID | jq -r .experiment.id)
+          echo "$EXP_ID"
+          STATUS=$(aws fis get-experiment --id $EXP_ID | jq -r .experiment.state.status )
+          until [ "$STATUS" == "completed" ]; do
+               echo "experiment is still in progress"
+               sleep 5
+               STATUS=$(aws fis get-experiment --id $EXP_ID | jq -r .experiment.state.status )
+          done
+          echo "Experiment has been completed but pls wait for the test report build to complete"

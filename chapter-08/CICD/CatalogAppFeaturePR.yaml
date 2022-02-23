@@ -1,0 +1,57 @@
+version: 0.2
+
+env:
+  variables:
+    AWS_DEFAULT_REGION: "us-east-1"
+    ACCOUNT_ID: "<Your Account ID>"
+    ASSOCIATION_ID: "<CodeGuru Association ID>"
+phases:
+  pre_build:
+    commands:
+      - build_name=$(echo $CODEBUILD_BUILD_ID | cut -d':' -f1)
+      - build_id=$(echo $CODEBUILD_BUILD_ID | cut -d':' -f2)
+      - link=$(echo "https://$AWS_DEFAULT_REGION.console.aws.amazon.com/codesuite/codebuild/projects/$build_name/build/$build_name%3A$build_id")
+      - aws codecommit post-comment-for-pull-request --pull-request-id $PULL_REQUEST_ID --repository-name $REPOSITORY_NAME --before-commit-id $DESTINATION_COMMIT --after-commit-id $SOURCE_COMMIT --content "Codebuild link $link"
+  build:
+    commands:
+      - echo "=============== CodeGuru Reviewer Scan Initiated ==============="
+      - BRANCH=$(echo $SOURCE_BRANCH | grep -o "heads/.*" | cut -d '/' -f 2)
+      - aws codeguru-reviewer create-code-review --name catalogApp-$CODEBUILD_BUILD_NUMBER --repository-association-arn arn:aws:codeguru-reviewer:us-east-1:$ACCOUNT_ID:association:$ASSOCIATION_ID --type RepositoryAnalysis={RepositoryHead={BranchName=$BRANCH}}
+      - |
+        CODEGURUREVIEW_SCAN_STATUS=$(aws codeguru-reviewer list-code-reviews --type RepositoryAnalysis --repository-name CatalogApp | jq -r .CodeReviewSummaries[0].State)
+        CODEREVIEW_ARN=$(aws codeguru-reviewer list-code-reviews --type RepositoryAnalysis --repository-name CatalogApp | jq -r .CodeReviewSummaries[0].CodeReviewArn)
+        until [ "$CODEGURUREVIEW_SCAN_STATUS" == "Completed" ]; do
+          printf "CODEGURU REVIEWER SCAN IS IN PROGRESS \n"
+          sleep 20
+          CODEGURUREVIEW_SCAN_STATUS=$(aws codeguru-reviewer list-code-reviews --type RepositoryAnalysis --repository-name CatalogApp | jq -r .CodeReviewSummaries[0].State)
+        done
+          printf "CODEGURU REVIEW SCAN HAS BEEN COMPLETED \n"
+        NO_OF_RECOMMENDATIONS=$(aws codeguru-reviewer list-recommendations --code-review-arn $CODEREVIEW_ARN | jq -r '.RecommendationSummaries | length')
+        if [ "$NO_OF_RECOMMENDATIONS" == 0 ]; then
+          echo "No Code Issues"
+          echo "###################Initiating Build#######################"
+          
+          REGISTRY_URI=${ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
+          aws ecr get-login-password --region ${AWS_DEFAULT_REGION} | docker login --username AWS --password-stdin $REGISTRY_URI
+          ls -al
+          for service in catalog_detail product_catalog frontend_node; do
+          docker build -t $service $service
+          result=$?
+          done
+        else
+          echo "There has been some recommendation, pls resolve it \n"
+          result=1
+        fi
+      - echo $result
+  post_build:
+    commands:
+      - |
+        if [ $result = 0 ]; then
+          content=$(echo "Build Succesful");
+          aws codecommit update-pull-request-approval-state --pull-request-id $PULL_REQUEST_ID --approval-state APPROVE --revision-id $REVISION_ID;
+          aws codecommit post-comment-for-pull-request --pull-request-id $PULL_REQUEST_ID --repository-name $REPOSITORY_NAME --before-commit-id $DESTINATION_COMMIT --after-commit-id $SOURCE_COMMIT --content "$content"
+        else
+          content=$(echo "Build Failed. Please review build logs");
+          aws codecommit post-comment-for-pull-request --pull-request-id $PULL_REQUEST_ID --repository-name $REPOSITORY_NAME --before-commit-id $DESTINATION_COMMIT --after-commit-id $SOURCE_COMMIT --content "$content"
+          exit 1
+        fi

@@ -1,0 +1,100 @@
+---
+apiVersion: appmesh.k8s.aws/v1beta2
+kind: VirtualNode
+metadata:
+  name: frontend-node
+  namespace: prodcatalog-ns
+spec:
+  podSelector:
+    matchLabels:
+      app: frontend-node
+  listeners:
+    - portMapping:
+        port: 9000
+        protocol: http
+  backends:
+    - virtualService:
+        virtualServiceRef:
+          name: prodcatalog
+    - virtualService:
+        virtualServiceRef:
+          name: proddetail
+  serviceDiscovery:
+    dns:
+      hostname: frontend-node.prodcatalog-ns.svc.cluster.local
+  logging:
+    accessLog:
+      file:
+        path: /dev/stdout
+---
+apiVersion: appmesh.k8s.aws/v1beta2
+kind: VirtualService
+metadata:
+  name: frontend-node
+  namespace: prodcatalog-ns
+spec:
+  awsName: frontend-node.prodcatalog-ns.svc.cluster.local
+  provider:
+    virtualNode:
+      virtualNodeRef:
+        name: frontend-node
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-node
+  namespace: prodcatalog-ns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend-node
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/path: '/stats/prometheus'
+      labels:
+        app: frontend-node
+    spec:
+      serviceAccountName: prodcatalog-envoy-proxies
+      containers:
+        - name: frontend-node
+          image: "${REPOSITORY_URI}"
+          imagePullPolicy: Always
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 9000
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 9000
+            successThreshold: 3
+          env:
+            - name: BASE_URL
+              value: "http://prodcatalog.prodcatalog-ns.svc.cluster.local:5000/products/"
+          ports:
+            - containerPort: 9000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  #annotations:
+  # This annotation is only required if you are creating an internal facing ELB. Remove this annotation to create public facing ELB.
+  #service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+  name: frontend-node
+  namespace: prodcatalog-ns
+  labels:
+    app: frontend-node
+spec:
+  ports:
+    - name: "http"
+      port: 9000
+      targetPort: 9000
+  selector:
+    app: frontend-node

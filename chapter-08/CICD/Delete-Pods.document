@@ -1,0 +1,75 @@
+---
+description: |
+  ### Document name - Delete Pod
+
+  ## What does this document do?
+  Delete Pod in a specific namespace via kubectl
+
+  ## Input Parameters
+  * Cluster: (Required)
+  * Namespace: (Required)
+  * InstallDependencies: If set to True, Systems Manager installs the required dependencies on the target instances. (default True)
+
+  ## Output Parameters
+  None.
+
+schemaVersion: '2.2'
+parameters:
+  Cluster:
+    type: String
+    description: '(Required) Specify the cluster name'
+  Namespace:
+    type: String
+    description: '(Required) Specify the target Namespace'
+  InstallDependencies:
+    type: String
+    description: 'If set to True, Systems Manager installs the required dependencies on the target instances (default: True)'
+    default: 'True'
+    allowedValues:
+      - 'True'
+      - 'False'
+mainSteps:
+  - action: aws:runShellScript
+    name: InstallDependencies
+    precondition:
+      StringEquals:
+        - platformType
+        - Linux
+    description: |
+      ## Parameter: InstallDependencies
+      If set to True, this step installs the required dependecy via operating system's repository.
+    inputs:
+      runCommand:
+        - |
+          #!/bin/bash
+          if [[ "{{ InstallDependencies }}" == True ]] ; then
+            if [[ "$( which kubectl 2>/dev/null )" ]] ; then echo Dependency is already installed. ; exit ; fi
+            echo "Installing required dependencies"
+            sudo mkdir -p $HOME/bin && cd $HOME/bin
+            sudo curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.20.4/2021-04-12/bin/linux/amd64/kubectl
+            sudo chmod +x ./kubectl
+            export PATH=$PATH:$HOME/bin
+          fi
+  - action: aws:runShellScript
+    name: ExecuteKubectlDeletePod
+    precondition:
+      StringEquals:
+        - platformType
+        - Linux
+    description: |
+      ## Parameters: Namespace, Cluster, Namespace
+      This step will terminate the random first pod based on namespace provided
+    inputs:
+      maxAttempts: 1
+      runCommand:
+        - |
+          if [ -z "{{ Cluster }}" ] ; then echo Cluster not specified && exit; fi
+          if [ -z "{{ Namespace }}" ] ; then echo Namespace not specified && exit; fi
+          pgrep kubectl && echo Another kubectl command is already running, exiting... && exit
+          EC2_REGION=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document|grep region | awk -F\" '{print $4}')
+          aws eks --region $EC2_REGION update-kubeconfig --name {{ Cluster }} --kubeconfig /home/ssm-user/.kube/config
+          echo Running kubectl command...
+          TARGET_POD=$(kubectl --kubeconfig /home/ssm-user/.kube/config get pods -n {{ Namespace }} -o jsonpath={.items[0].metadata.name})
+          echo "TARGET_POD: $TARGET_POD"
+          kubectl --kubeconfig /home/ssm-user/.kube/config delete pod $TARGET_POD -n {{ Namespace }} --grace-period=0 --force
+          echo Finished kubectl delete pod command.

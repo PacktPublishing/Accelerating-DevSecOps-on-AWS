@@ -1,0 +1,27 @@
+version: 0.2
+phases:
+  build:
+    commands:
+      - | 
+        aws eks update-kubeconfig --name catalogapp-prd
+        external_ip=""
+        SERVICE_NAME=ingress-gw
+        while [[ -z $external_ip ]]; do
+        	  echo "Waiting for end point..."
+        	  external_ip=$(kubectl get svc $SERVICE_NAME -n prodcatalog-ns --output="jsonpath={.status.loadBalancer.ingress[0].hostname}")
+        	  [[ -z "$external_ip" ]] && sleep 10
+        done
+        echo 'End point ready:' && echo $external_ip
+        attempt_counter=0
+        max_attempts=5
+        until [[ "$(curl -s -o /dev/null -w ''%{http_code}'' ${external_ip})" == "200" ]]; do
+            if [ ${attempt_counter} -eq ${max_attempts} ];then
+              echo "Max attempts reached"
+              echo "Health Check failed"
+              exit 1
+            fi
+            printf '.'
+            attempt_counter=$(($attempt_counter+1))
+            sleep 5
+        done
+        echo "Health Check Passed"

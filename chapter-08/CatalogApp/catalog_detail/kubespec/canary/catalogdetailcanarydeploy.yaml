@@ -1,0 +1,58 @@
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: proddetail
+  namespace: prodcatalog-ns
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: proddetail
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          # scale up if usage is above
+          # 99% of the requested CPU (100m)
+          averageUtilization: 99
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: proddetail
+  namespace: prodcatalog-ns
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: proddetail
+  template:
+    metadata:
+      labels:
+        app: proddetail
+    spec:
+      serviceAccountName: prodcatalog-envoy-proxies
+      containers:
+        - name: proddetail
+          image: "${REPOSITORY_URI}"
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 3000
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 3000
+            successThreshold: 3
+          ports:
+            - containerPort: 3000

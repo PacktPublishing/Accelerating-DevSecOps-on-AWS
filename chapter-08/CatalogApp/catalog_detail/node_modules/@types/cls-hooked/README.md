@@ -1,0 +1,16 @@
+# Installation
+> `npm install --save @types/cls-hooked`
+
+# Summary
+This package contains type definitions for cls-hooked (https://github.com/jeff-lewis/cls-hooked).
+
+# Details
+Files were exported from https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/cls-hooked.
+
+### Additional Details
+ * Last updated: Fri, 05 Feb 2021 05:00:40 GMT
+ * Dependencies: [@types/node](https://npmjs.com/package/@types/node)
+ * Global values: none
+
+# Credits
+These definitions were written by [Leo Liang](https://github.com/aleung).

@@ -1,4 +1,3 @@
-const api_key = 'Xkjhai23JGJIWekUGOOKPPWg38'
 var express = require("express");
 var app = express();
 var AWSXRay = require('aws-xray-sdk');

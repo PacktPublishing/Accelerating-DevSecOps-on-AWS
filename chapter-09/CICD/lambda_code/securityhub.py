@@ -22,7 +22,7 @@ def import_finding_to_sh(count: int, account_id: str, region: str, created_at: s
     new_findings.append({
         "SchemaVersion": "2018-10-08",
         "Id": finding_id,
-        "ProductArn": "arn:aws-us-gov:securityhub:{0}:{1}:product/{1}/default".format(region, account_id),
+        "ProductArn": "arn:aws:securityhub:{0}:{1}:product/{1}/default".format(region, account_id),
         "GeneratorId": generator_id,
         "AwsAccountId": account_id,
         "Types": [

@@ -1033,7 +1033,7 @@
                   Resource: '*'
                 - Effect: Allow
                   Action:
-                    - iam:PassRole
+                    - iam:*
                     - logs:*
                     - s3:*
                     - cloudformation:*
@@ -1048,6 +1048,7 @@
                     - ecr:*
                     - eks:*
                     - events:*
+                    - fis:*
                   Resource: '*'
         Path: /
         RoleName: !Join

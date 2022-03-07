@@ -52,6 +52,7 @@ metadata:
   labels:
     app: frontend-node
 spec:
+  type: LoadBalancer
   ports:
     - name: "http"
       port: 9000

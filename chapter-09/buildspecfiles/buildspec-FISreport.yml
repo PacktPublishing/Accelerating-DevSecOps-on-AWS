@@ -22,7 +22,7 @@ phases:
         while [[ $(date -u +%s) -le $endtime ]]
         do
             echo "----Endpoint status----"
-    curl -Is $endpointi:9000 | grep HTTP | ts
+    curl -Is $endpoint:9000 | grep HTTP | ts
             echo "----Pod Status----"
             kubectl get pods -n dsoapp -l 'app in (frontend,prodcatalog,proddetail)' | sed '1d' | ts
             echo "----Node Count Status----"

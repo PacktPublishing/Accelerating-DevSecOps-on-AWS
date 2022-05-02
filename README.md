@@ -7,7 +7,7 @@ This is the code repository for [Accelerating DevSecOps on AWS](https://www.pack
 **Create secure CI/CD pipelines using Chaos and AIOps**
 
 ## What is this book about?
-Continuous integration and continuous delivery (CI/CD) has never been simple, but these days the landscape is more bewildering than ever; its terrain riddled with blind alleys and pitfalls that seem almost designed to trap the less-experienced developer. If you�re determined enough to keep your balance on the cutting edge, this book will help you navigate the landscape with ease. 
+Continuous integration and continuous delivery (CI/CD) has never been simple, but these days the landscape is more bewildering than ever; its terrain riddled with blind alleys and pitfalls that seem almost designed to trap the less-experienced developer. If you're determined enough to keep your balance on the cutting edge, this book will help you navigate the landscape with ease. 
 
 This book covers the following exciting features:
 

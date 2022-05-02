@@ -1,8 +1,8 @@
-# Blue-green deployment
+# Accelerating DevSecOps on AWS
 
-<a href="https://www.packtpub.com/product/accelerating-devsecops-on-aws/9781803248608?utm_source=github&utm_medium=repository&utm_campaign=9781803248608"><img src="https://static.packt-cdn.com/products/9781803248608/cover/smaller" alt="Blue-green deployment" height="256px" align="right"></a>
+<a href="https://www.packtpub.com/product/accelerating-devsecops-on-aws/9781803248608?utm_source=github&utm_medium=repository&utm_campaign=9781803248608"><img src="https://static.packt-cdn.com/products/9781803248608/cover/smaller" alt="Accelerating DevSecOps on AWS" height="256px" align="right"></a>
 
-This is the code repository for [Blue-green deployment](https://www.packtpub.com/product/accelerating-devsecops-on-aws/9781803248608?utm_source=github&utm_medium=repository&utm_campaign=9781803248608), published by Packt.
+This is the code repository for [Accelerating DevSecOps on AWS](https://www.packtpub.com/product/accelerating-devsecops-on-aws/9781803248608?utm_source=github&utm_medium=repository&utm_campaign=9781803248608), published by Packt.
 
 **Create secure CI/CD pipelines using Chaos and AIOps**
 
@@ -10,13 +10,14 @@ This is the code repository for [Blue-green deployment](https://www.packtpub.com
 Continuous integration and continuous delivery (CI/CD) has never been simple, but these days the landscape is more bewildering than ever; its terrain riddled with blind alleys and pitfalls that seem almost designed to trap the less-experienced developer. If you�re determined enough to keep your balance on the cutting edge, this book will help you navigate the landscape with ease. 
 
 This book covers the following exciting features:
-Use AWS Codestar to design and implement a full branching strategy
-Enforce Policy as Code using CloudFormation Guard and HashiCorp Sentinel
-Master app and infrastructure deployment at scale using AWS Proton and review app code using CodeGuru
-Deploy and manage production-grade clusters using AWS EKS, App Mesh, and X-Ray
-Harness AWS Fault Injection Simulator to test the resiliency of your app
-Wield the full arsenal of AWS Security Hub and Systems Manager for infrastructure security automation
-Enhance CI/CD pipelines with the AI-powered DevOps Guru service
+
+* Use AWS Codestar to design and implement a full branching strategy
+* Enforce Policy as Code using CloudFormation Guard and HashiCorp Sentinel
+* Master app and infrastructure deployment at scale using AWS Proton and review app code using CodeGuru
+* Deploy and manage production-grade clusters using AWS EKS, App Mesh, and X-Ray
+* Harness AWS Fault Injection Simulator to test the resiliency of your app
+* Wield the full arsenal of AWS Security Hub and Systems Manager for infrastructure security automation
+* Enhance CI/CD pipelines with the AI-powered DevOps Guru service
 
 If you feel this book is for you, get your [copy](https://www.amazon.com/dp/1803248602) today!
 
@@ -45,9 +46,9 @@ With the following software and hardware list you can run all code files present
 We also provide a PDF file that has color images of the screenshots/diagrams used in this book. [Click here to download it]( https://static.packt-cdn.com/downloads/9781803248608_ColorImages.pdf).
 
 ### Related products
-* About the Author [[Packt]](https://www.packtpub.com/product/enterprise-devops-for-architects/9781801812153?utm_source=github&utm_medium=repository&utm_campaign=9781801812153) [[Amazon]](https://www.amazon.com/dp/1801812152)
+* Enterprise DevOps for Architects [[Packt]](https://www.packtpub.com/product/enterprise-devops-for-architects/9781801812153?utm_source=github&utm_medium=repository&utm_campaign=9781801812153) [[Amazon]](https://www.amazon.com/dp/1801812152)
 
-* About the Author [[Packt]](https://www.packtpub.com/product/aws-certified-devops-engineer-professional-certification-and-beyond/9781801074452?utm_source=github&utm_medium=repository&utm_campaign=9781801074452) [[Amazon]](https://www.amazon.com/dp/1801074453)
+* AWS Certified DevOps Engineer - Professional Certification and Beyond [[Packt]](https://www.packtpub.com/product/aws-certified-devops-engineer-professional-certification-and-beyond/9781801074452?utm_source=github&utm_medium=repository&utm_campaign=9781801074452) [[Amazon]](https://www.amazon.com/dp/1801074453)
 
 ## Get to Know the Author
 **Nikit Swaraj**

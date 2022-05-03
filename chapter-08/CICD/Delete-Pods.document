@@ -69,7 +69,7 @@ mainSteps:
           EC2_REGION=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document|grep region | awk -F\" '{print $4}')
           aws eks --region $EC2_REGION update-kubeconfig --name {{ Cluster }} --kubeconfig /home/ssm-user/.kube/config
           echo Running kubectl command...
-          TARGET_POD=$(kubectl --kubeconfig /home/ssm-user/.kube/config get pods -n {{ Namespace }} -o jsonpath={.items[0].metadata.name})
+          TARGET_POD=$(kubectl --kubeconfig /home/ssm-user/.kube/config get pods -n {{ Namespace }} -o jsonpath={.items[*].metadata.name})
           echo "TARGET_POD: $TARGET_POD"
           kubectl --kubeconfig /home/ssm-user/.kube/config delete pod $TARGET_POD -n {{ Namespace }} --grace-period=0 --force
           echo Finished kubectl delete pod command.

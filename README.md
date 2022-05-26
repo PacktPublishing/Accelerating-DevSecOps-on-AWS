@@ -1,3 +1,7 @@
+## [Get this title for $10 on Packt's Spring Sale](https://www.packt.com/B17964?utm_source=github&utm_medium=packt-github-repo&utm_campaign=spring_10_dollar_2022)
+-----
+For a limited period, all eBooks and Videos are only $10. All the practical content you need \- by developers, for developers
+
 # Accelerating DevSecOps on AWS
 
 <a href="https://www.packtpub.com/product/accelerating-devsecops-on-aws/9781803248608?utm_source=github&utm_medium=repository&utm_campaign=9781803248608"><img src="https://static.packt-cdn.com/products/9781803248608/cover/smaller" alt="Accelerating DevSecOps on AWS" height="256px" align="right"></a>

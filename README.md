@@ -53,3 +53,7 @@ We also provide a PDF file that has color images of the screenshots/diagrams use
 ## Get to Know the Author
 **Nikit Swaraj**
 is an experienced solution architect. He is well versed in the melding of development and operations to deliver efficient code. Nikit has expertise in designing, developing, and delivering enterprise-wide solutions that meet business requirements and enhance operational efficiency. As an AWS solution architect, he has plenty of experience in designing end-to-end IT solutions and leading and managing complete projects within time and budgetary constraints. He contributes to open source toolsandhas experience working with startups as well enterprise including FSI, Public and Governement sector. He holds various professional certification from AWS, Red Hat, CNCF and Hashicorp. He loves to share his experience with latest technologies in AWS Meetups.
+### Download a free PDF
+
+ <i>If you have already purchased a print or Kindle version of this book, you can get a DRM-free PDF version at no cost.<br>Simply click on the link to claim your free PDF.</i>
+<p align="center"> <a href="https://packt.link/free-ebook/9781803248608">https://packt.link/free-ebook/9781803248608 </a> </p>
